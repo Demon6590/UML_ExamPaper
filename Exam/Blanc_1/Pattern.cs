@@ -1,4 +1,7 @@
-﻿namespace Exam.Blanc_1;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Exam.Blanc_1;
 
 public interface IObserver
 {
