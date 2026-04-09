@@ -1,71 +1,76 @@
 ﻿namespace Exam.Blanc_1;
 
-public record Computer(
-    string CPU,
-    int RAM,
-    string Storage,
-    string? GraphicsCard = null)
+public interface IObserver
 {
-    public override string ToString() =>
-        $"Computer: CPU={CPU}, RAM={RAM}GB, Storage={Storage}, Graphics={GraphicsCard ?? "Integrated"}";
+    void Update(string news);
 }
 
-
-public class ComputerBuilder
+public interface IObservable
 {
-    private string _cpu = "";
-    private int _ram = 0;
-    private string _storage = "";
-    private string? _graphicsCard;
+    void Subscribe(IObserver observer);
+    void Unsubscribe(IObserver observer);
+    void Notify();
+}
 
-    public ComputerBuilder WithCpu(string cpu)
+public class NewsAgency : IObservable
+{
+    private List<IObserver> _observers = new List<IObserver>();
+    private string _latestNews;
+
+    public void SetNews(string news)
     {
-        _cpu = cpu;
-        return this;
+        _latestNews = news;
+        Notify();
     }
 
-    public ComputerBuilder WithRam(int ramGb)
+    public void Subscribe(IObserver observer)
     {
-        _ram = ramGb;
-        return this;
+        _observers.Add(observer);
     }
 
-    public ComputerBuilder WithStorage(string storage)
+    public void Unsubscribe(IObserver observer)
     {
-        _storage = storage;
-        return this;
+        _observers.Remove(observer);
     }
 
-    public ComputerBuilder WithGraphicsCard(string graphicsCard)
+    public void Notify()
     {
-        _graphicsCard = graphicsCard;
-        return this;
+        foreach (var observer in _observers)
+            observer.Update(_latestNews);
+    }
+}
+
+public class Subscriber : IObserver
+{
+    private string _name;
+
+    public Subscriber(string name)
+    {
+        _name = name;
     }
 
-    public Computer Build() =>
-        new(_cpu, _ram, _storage, _graphicsCard);
+    public void Update(string news)
+    {
+        Console.WriteLine($"{_name} получил новость: {news}");
+    }
 }
 
 class Program
 {
     static void Main()
     {
+        NewsAgency agency = new NewsAgency();
+        Subscriber sub1 = new Subscriber("Иван");
+        Subscriber sub2 = new Subscriber("Мария");
 
-        var officePc = new ComputerBuilder()
-            .WithCpu("Intel i5-12400")
-            .WithRam(16)
-            .WithStorage("SSD 512GB")
-            .Build();
+        agency.Subscribe(sub1);
+        agency.Subscribe(sub2);
 
-        Console.WriteLine(officePc);
+        agency.SetNews("Первая новость!");
 
-        var gamingPc = new ComputerBuilder()
-            .WithCpu("AMD Ryzen 7 7800X3D")
-            .WithRam(32)
-            .WithStorage("SSD 2TB")
-            .WithGraphicsCard("RTX 4080")
-            .Build();
+        agency.Unsubscribe(sub1);
+        agency.SetNews("Вторая новость (только для Марии).");
 
-        Console.WriteLine(gamingPc);
+        Console.ReadKey();
     }
 }

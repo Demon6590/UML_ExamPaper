@@ -1,29 +1,38 @@
-﻿Практическое задание 1 (UML)
+﻿giПрактическое задание 1 (UML)
 
 ```mermaid
-sequenceDiagram
-    participant U as User
-    participant LF as LoginForm
-    participant AS as AuthService
-    participant UD as UserDatabase
-    participant ES as EmailService
+classDiagram
+    class Book {
+        -String inventoryNumber
+        -String title
+        -String[] authors
+        -int publicationYear
+        +getInventoryNumber() String
+        +getTitle() String
+        +isAvailable() boolean
+    }
 
-    U->>LF: Вводит логин и пароль
-    LF->>AS: submitLogin(login, password)
-    AS->>UD: validateCredentials(login, password)
-    UD-->>AS: Credentials valid
-    AS->>ES: sendOTP(email, otpCode)
-    ES-->>AS: OTP sent
-    Note over AS,ES: Код отправлен на email
-    U->>LF: Вводит OTP код
-    LF->>AS: submitOTP(otpCode)
-    AS->>AS: validateOTP(otpCode)
-    alt Код верен
-        AS-->>LF: loginSuccess()
-        LF-->>U: Доступ к кабинету
-    else Код неверен
-        AS-->>LF: loginFailed()
-        LF-->>U: Ошибка аутентификации
-    end
+    class Reader {
+        -String ticketNumber
+        -String name
+        -String phone
+        +getTicketNumber() String
+        +getName() String
+        +getCurrentLoansCount() int
+    }
+
+    class Loan {
+        -Date issueDate
+        -Date dueDate
+        +getIssueDate() Date
+        +getDueDate() Date
+        +isOverdue() boolean
+        +closeLoan()
+    }
+
+    Reader "1" -- "0..5" Loan : берет
+    Book "1" -- "0..1" Loan : выдается
+    Loan ..>  Reader : принадлежит
+    Loan ..>  Book : книга
 ```
 
