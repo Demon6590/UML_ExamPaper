@@ -1,0 +1,33 @@
+﻿@startuml
+skinparam style strictuml
+skinparam MaxMessageSize 150
+
+actor User as "User"
+participant LoginForm as "LoginForm"
+participant AuthService as "AuthService"
+database UserDatabase as "UserDatabase"
+participant EmailService as "EmailService"
+
+' Шаг 1: Ввод учетных данных
+User -> LoginForm : Вводит логин и пароль
+LoginForm -> AuthService : Передает учетные данные
+
+' Шаг 2: Проверка в БД
+AuthService -> UserDatabase : Запрос на проверку (login, password)
+UserDatabase --> AuthService : Успешная проверка
+
+' Шаг 3: Генерация и отправка кода
+AuthService -> AuthService : Генерирует одноразовый код
+AuthService -> EmailService : Отправить код на email пользователя
+EmailService --> User : Письмо с кодом
+
+' Шаг 4: Ввод кода пользователем
+User -> LoginForm : Вводит одноразовый код
+LoginForm -> AuthService : Передает код для валидации
+
+' Шаг 5: Проверка кода и доступ
+AuthService -> AuthService : Проверяет соответствие кода
+AuthService -> LoginForm : Подтверждает вход
+LoginForm -> User : Перенаправляет в личный кабинет
+
+@enduml
